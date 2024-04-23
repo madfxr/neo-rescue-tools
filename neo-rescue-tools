@@ -1,0 +1,131 @@
+#!/bin/bash
+
+printf "\n"
+printf "███╗   ██╗███████╗ ██████╗\n"
+printf "████╗  ██║██╔════╝██╔═══██╗\n"
+printf "██╔██╗ ██║█████╗  ██║   ██║\n"
+printf "██║╚██╗██║██╔══╝  ██║   ██║\n"
+printf "██║ ╚████║███████╗╚██████╔╝\n"
+printf "╚═╝  ╚═══╝╚══════╝ ╚═════╝\n"
+printf "     - RESCUE TOOLS -\n"
+
+# ARRAY UNTUK MENYIMPAN INFORMASI GPARTED ID DAN LABELNYA
+declare -a gparted_image_ids=("0905f508-f240-4ab2-adca-d70d9e4a9e98:JKT-2" "0ad464f1-865d-41dc-a269-a9b7dabeb22c:WJV-2" "fc0d86a9-e795-4d69-b2ba-8fe1d7b1f4de:BTN-1")
+
+# FUNGSI UNTUK MENAMPILKAN GPARTED ID SESUAI REGION
+print_gparted_image_options() {
+    for ((i=0; i<${#gparted_image_ids[@]}; i++)); do
+        IFS=':' read -r image_id label <<< "${gparted_image_ids[i]}"
+        printf "%d. %s\n" "$((i+1))" "$label"
+    done
+}
+
+# FUNGSI UNTUK MEMILIH GPARTED ID SESUAI REGION
+select_gparted_image_id() {
+    read -rp "SELECT GPARTED LIVE IMAGE: " choice
+    index=$(($choice - 1))
+    if (( index >= 0 && index < ${#gparted_image_ids[@]} )); then
+        IFS=':' read -r gparted_image_id label <<< "${gparted_image_ids[index]}"
+        printf "%s\n" "$gparted_image_id"
+    else
+        printf "Invalid Option!\n"
+        exit 1
+    fi
+}
+
+# FUNGSI UNTUK MENAMPILKAN PROJECT ID SAAT INI
+print_customer_project_id() {
+    printf "PROJECT ID SAAT INI: %s\n" "$customer_project_id"
+}
+
+# FUNGSI UNTUK MENAMPILKAN LIST INSTANCE BERDASARKAN PROJECT ID
+print_instance_list() {
+    printf "LIST INSTANCES FOR PROJECT ID: "$customer_project_id"\n"
+    openstack server list --os-project-id "$customer_project_id"
+}
+
+# FUNGSI UNTUK MENAMPILKAN DETAIL STATUS INSTANCE BERDASARKAN PROJECT ID
+print_instance_status() {
+    instance_id="$1"
+    openstack server show "$instance_id" --os-project-id "$customer_project_id"
+}
+
+# FUNGSI UNTUK MENAMPILKAN CONSOLE INSTANCE BERDASARKAN PROJECT ID
+print_console_url() {
+    printf "URL OF THE SELECTED CONSOLE INSTANCE: "$instance_id"\n"
+    openstack console url show "$instance_id" --os-project-id "$customer_project_id"
+}
+
+# FUNGSI UNTUK MENAMPILKAN MENU DARI TOOLS
+print_menu() {
+    printf "\nMENU:\n"
+    printf "1. Add Image GParted Live\n"
+    printf "2. Show Member Image Informastion\n"
+    printf "3. Rescue Instance\n"
+    printf "4. Unrescue Instance\n"
+    printf "5. Show Console Instance\n"
+    printf "6. Remove Image GParted Live\n"
+    printf "X. Exit\n"
+}
+
+# FUNGSI PERULANGAN
+while :
+do
+    print_menu
+    read -rp "ENTER MENU: " option
+
+    # FUNGSI UNTUK MEMILIH ACTION PADA MENU TOOLS
+    case $option in
+        1)
+            read -rp "ENTER CUSTOMER PROJECT ID: " customer_project_id
+            print_gparted_image_options
+            gparted_image_id=$(select_gparted_image_id)
+            openstack image add project "$gparted_image_id" "$customer_project_id"
+            openstack image set --accept "$gparted_image_id" --os-project-id "$customer_project_id"
+            ;;
+        2)
+            print_gparted_image_options
+            gparted_image_id=$(select_gparted_image_id)
+            openstack image member list "$gparted_image_id"
+            ;;
+        3)
+            read -rp "ENTER CUSTOMER PROJECT ID: " customer_project_id
+            print_instance_list
+            read -rp "ENTER CUSTOMER INSTANCE ID: " customer_instance_id
+            print_gparted_image_options
+            gparted_image_id=$(select_gparted_image_id)
+            openstack server rescue --os-project-id "$customer_project_id" "$customer_instance_id" --image "$gparted_image_id"
+            printf "\nWaiting 10 Seconds to List the Latest Instance Status...\n"
+            sleep 10
+            print_instance_list
+            ;;
+        4)
+            read -rp "ENTER CUSTOMER PROJECT ID: " customer_project_id
+            print_instance_list
+            read -rp "ENTER CUSTOMER INSTANCE ID: " customer_instance_id
+            if ! openstack server unrescue --os-project-id "$customer_project_id" "$customer_instance_id"; then
+                printf "Instance Was Not Found or An Error Occurred!\n"
+            fi
+            printf "\nWaiting 10 Seconds to List the Latest Instance Status...\n"
+            sleep 10
+            print_instance_list
+            ;;
+        5)
+            read -rp "ENTER CUSTOMER INSTANCE ID: " instance_id
+            print_console_url
+            ;;
+        6)
+            read -rp "ENTER CUSTOMER PROJECT ID: " customer_project_id
+            print_gparted_image_options
+            gparted_image_id=$(select_gparted_image_id)
+            openstack image remove project "$customer_project_id" "$gparted_image_id"
+            ;;
+        X)
+            printf "Exit from NEO Rescue Tools...\n"
+            exit 0
+            ;;
+        *)
+            printf "Invalid Option!\n"
+            ;;
+    esac
+done
