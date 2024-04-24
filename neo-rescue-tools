@@ -118,7 +118,7 @@ do
             read -rp "ENTER CUSTOMER PROJECT ID: " customer_project_id
             print_gparted_image_options
             gparted_image_id=$(select_gparted_image_id)
-            openstack image remove project "$customer_project_id" "$gparted_image_id"
+            openstack image remove project "$gparted_image_id" "$customer_project_id"
             ;;
         X)
             printf "Exit from NEO Rescue Tools...\n"
