@@ -7,7 +7,7 @@ printf "██╔██╗ ██║█████╗  ██║   ██║\n"
 printf "██║╚██╗██║██╔══╝  ██║   ██║\n"
 printf "██║ ╚████║███████╗╚██████╔╝\n"
 printf "╚═╝  ╚═══╝╚══════╝ ╚═════╝\n"
-printf "     - RESCUE TOOLS -\n"
+printf "\e[1;36m     - RESCUE TOOLS -\e[0m\n"
 
 # ARRAY UNTUK MENYIMPAN INFORMASI GPARTED ID DAN LABELNYA
 declare -a gparted_image_ids=("0905f508-f240-4ab2-adca-d70d9e4a9e98:JKT-2" "0ad464f1-865d-41dc-a269-a9b7dabeb22c:WJV-2" "fc0d86a9-e795-4d69-b2ba-8fe1d7b1f4de:BTN-1")
@@ -96,22 +96,21 @@ do
     read -rp $'\e[1;33mENTER MENU: \e[0m' option
 
     case $option in
-        1)
-            read -rp $'\e[1;33mENTER CUSTOMER PROJECT ID: \e[0m' customer_project_id
-            print_gparted_image_options
-            gparted_image_id=$(select_gparted_image_id)
-
-            # FUNGSI UNTUK MEMERIKSA IMAGE SUDAH DITAMBAHKAN KE PROJECT ID YANG SESUAI
-            project_assigned=$(openstack image show "$gparted_image_id" -c properties -f value | grep -o '"os_project_id": "[^"]\+"' | cut -d: -f2 | tr -d '" ')
-            
-            if [ -z "$project_assigned" ]; then
-                printf "Image \e[1;36m%s\e[0m Added to Project ID \e[1;36m%s\e[0m\n" "$gparted_image_id" "$customer_project_id"
-                openstack image add project "$gparted_image_id" "$customer_project_id"
-                openstack image set --accept "$gparted_image_id" --os-project-id "$customer_project_id"
-            else
-                printf "Image \e[1;36m%s\e[0m Already Added to Project ID \e[1;36m%s\e[0m\n" "$gparted_image_id" "$project_assigned"
-            fi
-            ;;
+      1)
+          read -rp $'\e[1;33mENTER CUSTOMER PROJECT ID: \e[0m' customer_project_id
+          print_gparted_image_options
+          gparted_image_id=$(select_gparted_image_id)
+          
+          # FUNGSI UNTUK MEMERIKSA IMAGE SUDAH DITAMBAHKAN KE PROJECT ID YANG SESUAI
+          project_assigned=$(openstack image show "$gparted_image_id" -c properties -f value | grep -o '"os_project_id": "[^"]\+"' | cut -d: -f2 | tr -d '" ')
+          if [ -z "$project_assigned" ]; then
+              printf "Image \e[1;36m%s\e[0m Has Been Added to Project ID \e[1;36m%s\e[0m\n" "$gparted_image_id" "$customer_project_id"
+              openstack image add project "$gparted_image_id" "$customer_project_id"
+              openstack image set --accept "$gparted_image_id" --os-project-id "$customer_project_id"
+          else
+              printf "ConflictException: 409: Client Error for url: https://glance.btn-1.neo.id:13292/v2/images/%s/members, : 409 Conflict: Member %s is duplicated for image %s\n" "$gparted_image_id" "$customer_project_id" "$gparted_image_id"
+          fi
+          ;;
         2)
             print_gparted_image_options
             gparted_image_id=$(select_gparted_image_id)
