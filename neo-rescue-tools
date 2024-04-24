@@ -86,7 +86,7 @@ print_menu() {
     printf "4. Unrescue Instance\n"
     printf "5. Show Console Instance\n"
     printf "6. Remove Image GParted Live\n"
-    printf "X. Exit\n"
+    printf "X. Exit (CTRL+X)\n"
 }
 
 # FUNGSI PERULANGAN
@@ -150,7 +150,7 @@ do
             openstack image remove project "$gparted_image_id" "$customer_project_id"
             printf "Image \e[1;36m%s\e[0m Has Been Removed from Project ID \e[1;36m%s\e[0m\n" "$gparted_image_id" "$customer_project_id"
             ;;
-        X)
+        X|'CTRL+X')
             printf "\e[1;31mExit from NEO Rescue Tools...\e[0m\n"
             exit 0
             ;;
