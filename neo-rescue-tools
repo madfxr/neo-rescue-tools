@@ -81,7 +81,7 @@ show_member_info() {
 print_menu() {
     printf "\n\e[1;36mMENU:\e[0m\n"
     printf "1. Add Image GParted Live\n"
-    printf "2. Show Member Image Informastion\n"
+    printf "2. Show Member Image Information\n"
     printf "3. Rescue Instance\n"
     printf "4. Unrescue Instance\n"
     printf "5. Show Console Instance\n"
@@ -108,7 +108,7 @@ do
               openstack image add project "$gparted_image_id" "$customer_project_id"
               openstack image set --accept "$gparted_image_id" --os-project-id "$customer_project_id"
           else
-              printf "ConflictException: 409: Client Error for url: https://glance.btn-1.neo.id:13292/v2/images/%s/members, : 409 Conflict: Member %s is duplicated for image %s\n" "$gparted_image_id" "$customer_project_id" "$gparted_image_id"
+             printf "Image \e[1;36m%s\e[0m Already Added to Project ID \e[1;36m%s\e[0m\n" "$gparted_image_id" "$customer_project_id"
           fi
           ;;
         2)
