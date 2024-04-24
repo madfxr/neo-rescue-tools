@@ -1,4 +1,3 @@
-(btn-1) [unroot@madfxr opt]$ cat /usr/bin/neo-rescue-tools 
 #!/bin/bash
 
 printf "\n"
