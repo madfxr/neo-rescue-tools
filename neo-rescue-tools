@@ -1,13 +1,12 @@
 #!/bin/bash
-
-printf "\n          ようこそ\n"
+printf "\n\e[1;36m\e[5m          ようこそ\e[0m\e[1;36m\e[0m\n"
 printf "███╗   ██╗███████╗ ██████╗\n"
 printf "████╗  ██║██╔════╝██╔═══██╗\n"
 printf "██╔██╗ ██║█████╗  ██║   ██║\n"
 printf "██║╚██╗██║██╔══╝  ██║   ██║\n"
 printf "██║ ╚████║███████╗╚██████╔╝\n"
 printf "╚═╝  ╚═══╝╚══════╝ ╚═════╝\n"
-printf "\e[1;36m     - RESCUE TOOLS -\e[0m\n"
+printf "\e[1;36m      - RESCUE TOOLS -\e[0m\n"
 
 # ARRAY UNTUK MENYIMPAN INFORMASI GPARTED ID DAN LABELNYA
 declare -a gparted_image_ids=("0905f508-f240-4ab2-adca-d70d9e4a9e98:JKT-2" "0ad464f1-865d-41dc-a269-a9b7dabeb22c:WJV-2" "fc0d86a9-e795-4d69-b2ba-8fe1d7b1f4de:BTN-1")
@@ -75,7 +74,7 @@ show_member_info() {
 
 # FUNGSI UNTUK MENAMPILKAN MENU DARI TOOLS
 print_menu() {
-    printf "\n\e[1;36mMENU:\e[0m\n"
+    printf "\n\e[4m\e[1;36mMENU\e[0m\n"
     printf "1. Add Image GParted Live\n"
     printf "2. Show Member Image Information\n"
     printf "3. Rescue Instance\n"
