@@ -1,4 +1,5 @@
 #!/bin/bash
+# Made with ✨ Magic ©️ Nur Mukhammad Agus (https://github.com/madfxr), 2024. Free and Open Source Software (FOSS).
 printf "\n\e[1;36m\e[5m          ようこそ\e[0m\e[1;36m\e[0m\n"
 printf "███╗   ██╗███████╗ ██████╗\n"
 printf "████╗  ██║██╔════╝██╔═══██╗\n"
@@ -8,126 +9,188 @@ printf "██║ ╚████║███████╗╚█████�
 printf "╚═╝  ╚═══╝╚══════╝ ╚═════╝\n"
 printf "\e[1;36m      - RESCUE TOOLS -\e[0m\n"
 
-# ARRAY UNTUK MENYIMPAN INFORMASI GPARTED ID DAN LABELNYA
-declare -a gparted_image_ids=("0905f508-f240-4ab2-adca-d70d9e4a9e98:JKT-2" "0ad464f1-865d-41dc-a269-a9b7dabeb22c:WJV-2" "fc0d86a9-e795-4d69-b2ba-8fe1d7b1f4de:BTN-1")
+declare -a image_ids=("0905f508-f240-4ab2-adca-d70d9e4a9e98:JKT-2" "0ad464f1-865d-41dc-a269-a9b7dabeb22c:WJV-2" "fc0d86a9-e795-4d69-b2ba-8fe1d7b1f4de:BTN-1")
 
-# FUNGSI UNTUK MENAMPILKAN GPARTED ID SESUAI REGION
 print_gparted_image_options() {
-    for ((i=0; i<${#gparted_image_ids[@]}; i++)); do
-        IFS=':' read -r image_id label <<< "${gparted_image_ids[i]}"
+    for ((i=0; i<${#image_ids[@]}; i++)); do
+        IFS=':' read -r image_id label <<< "${image_ids[i]}"
         printf "%d. %s\n" "$((i+1))" "$label"
     done
 }
 
-# FUNGSI UNTUK MEMILIH GPARTED ID SESUAI REGION
-select_gparted_image_id() {
+select_image_id() {
     read -rp $'\e[1;33mSELECT GPARTED LIVE IMAGE: \e[0m' choice
     index=$(($choice - 1))
-    if (( index >= 0 && index < ${#gparted_image_ids[@]} )); then
-        IFS=':' read -r gparted_image_id label <<< "${gparted_image_ids[index]}"
-        printf "%s\n" "$gparted_image_id"
+    if (( index >= 0 && index < ${#image_ids[@]} )); then
+        IFS=':' read -r image_id label <<< "${image_ids[index]}"
+        printf "%s\n" "$image_id"
     else
         printf "\e[1;31mInvalid Option!\e[0m\n"
         exit 1
     fi
 }
 
-# FUNGSI UNTUK MENAMPILKAN PROJECT ID SAAT INI
-print_customer_project_id() {
-    printf "Current Project ID \e[1;36m%s\e[0m\n" "$customer_project_id"
+print_project_id() {
+    printf "Current Project ID \e[1;36m%s\e[0m\n" "$project_id"
 }
 
-# FUNGSI UNTUK MENAMPILKAN LIST INSTANCE BERDASARKAN PROJECT ID
 print_instance_list() {
-    printf "List Instance for Project ID \e[1;36m%s\e[0m\n" "$customer_project_id"
-    openstack server list --os-project-id "$customer_project_id"
+    printf "List Instance for Project ID \e[1;36m%s\e[0m\n" "$project_id"
+    openstack server list --os-project-id "$project_id"
 }
 
-# FUNGSI UNTUK MENAMPILKAN DETAIL STATUS INSTANCE BERDASARKAN PROJECT ID
 print_instance_status() {
     instance_id="$1"
-    openstack server show "$instance_id" --os-project-id "$customer_project_id"
+    openstack server show "$instance_id" --os-project-id "$project_id"
 }
 
-# FUNGSI UNTUK MENAMPILKAN CONSOLE INSTANCE BERDASARKAN PROJECT ID
 print_console_url() {
     printf "URL of the Console Instance \e[1;36m%s\e[0m\n" "$instance_id"
-    openstack console url show "$instance_id" --os-project-id "$customer_project_id"
+    openstack console url show "$instance_id" --os-project-id "$project_id"
 }
 
-# FUNGSI UNTUK MENAMPILKAN INFORMASI ANGGOTA IMAGE BERDASARKAN IMAGE ID DAN PROJECT ID
 show_member_info() {
-    local gparted_image_id="$1"
-    local customer_project_id="$2"
+    local image_id="$1"
+    local project_id="$2"
 
-    if [[ -n "$customer_project_id" ]]; then
-        if openstack image member list "$gparted_image_id" | grep -q "$customer_project_id"; then
-            printf "Current Member of Image \e[1;36m%s\e[0m\n" "$gparted_image_id"
-            openstack image member list "$gparted_image_id"
+    if [[ -n "$project_id" ]]; then
+        if openstack image member list "$image_id" | grep -q "$project_id"; then
+            printf "Current Member of Image \e[1;36m%s\e[0m\n" "$image_id"
+            openstack image member list "$image_id"
         else
-            printf "No Project ID Added on Image \e[1;36m%s\e[0m\n" "$gparted_image_id"
+            printf "No Project ID Added on Image \e[1;36m%s\e[0m\n" "$image_id"
         fi
     else
-        printf "\e[1;31mNo Customer Project ID Specified!\e[0m\n"
+        printf "\e[1;31mNo Project ID Specified!\e[0m\n"
     fi
 }
 
-# FUNGSI UNTUK MENAMPILKAN MENU DARI TOOLS
+add_user_role() {
+    local user_id="$1"
+    local project_id="$2"
+    local role_id="$3"
+    
+    openstack role add --user "$user_id" --project "$project_id" "$role_id"
+}
+
+remove_user_role() {
+    local user_id="$1"
+    local project_id="$2"
+    local role_id="$3"
+    
+    openstack role remove --user "$user_id" --project "$project_id" "$role_id"
+}
+
+print_domain_info() {
+    printf "\e[1;36mDomains\e[0m\n"
+    openstack domain list
+}
+
+print_user_info() {
+    printf "\n\e[1;36mUsers\e[0m\n"
+    openstack user list
+}
+
+print_role_info() {
+    printf "\n\e[1;36mRoles\e[0m\n"
+    openstack role list
+}
+
+print_user_role_domain_info() {
+    print_domain_info
+    print_user_info
+    print_role_info
+}
+
 print_menu() {
     printf "\n\e[4m\e[1;36mMENU\e[0m\n"
-    printf "1. Add Image GParted Live\n"
-    printf "2. Show Member Image Information\n"
+    printf "0. Show User, Role & Domain Information\n"
+    printf "A. Add User Role to Project\n"
+    printf "R. Remove User Role from Project\n"
+    printf "U. Show User Role from Project\n"
+    printf "I. Show Instance List\n"
+    printf "1. Add GParted Live Image to Project\n"
+    printf "2. Show Image Member Information\n"
     printf "3. Rescue Instance\n"
     printf "4. Unrescue Instance\n"
-    printf "5. Show Console Instance\n"
-    printf "6. Remove Image GParted Live\n"
+    printf "5. Show Instance Console\n"
+    printf "6. Remove GParted Live Image from Project\n"
     printf "X. Exit\n"
 }
 
-# FUNGSI PERULANGAN
 while :
 do
     print_menu
     read -rp $'\e[1;33mENTER MENU: \e[0m' option
 
     case $option in
-      1)
-          read -rp $'\e[1;33mENTER CUSTOMER PROJECT ID: \e[0m' customer_project_id
+       	0)
+          printf "\e[1;31mDisplaying Required Information from OpenStack...\e[0m\n"
+          print_user_role_domain_info
+          ;;
+       A|a)
+          read -rp $'\e[1;33mENTER USER ID: \e[0m' user_id
+          read -rp $'\e[1;33mENTER PROJECT ID: \e[0m' project_id
+          read -rp $'\e[1;33mENTER ROLE ID: \e[0m' role_id
+          add_user_role "$user_id" "$project_id" "$role_id"
+          printf "User \e[1;36m%s\e[0m Has Been Added to Project ID \e[1;36m%s\e[0m\n" "$user_id" "$project_id"
+          openstack role assignment list --user "$user_id"
+          openstack role assignment list --project "$project_id" --name
+          ;;
+       R|s)
+          read -rp $'\e[1;33mENTER USER ID: \e[0m' user_id
+          read -rp $'\e[1;33mENTER PROJECT ID: \e[0m' project_id
+          read -rp $'\e[1;33mENTER ROLE ID: \e[0m' role_id
+          remove_user_role "$user_id" "$project_id" "$role_id"
+          printf "User \e[1;36m%s\e[0m Has Been Removed from Project ID \e[1;36m%s\e[0m\n" "$user_id" "$project_id"
+          openstack role assignment list --user "$user_id"
+          openstack role assignment list --project "$project_id" --name
+          ;;
+       	U)
+          printf "List User Role for Project ID \e[1;36m%s\e[0m\n" "$project_id"
+          openstack role assignment list --user "$user_id"
+          openstack role assignment list --project "$project_id" --name
+          ;;
+       I|i)
+          read -rp $'\e[1;33mENTER PROJECT ID: \e[0m' project_id
+          print_instance_list
+          ;;
+        1)
+          read -rp $'\e[1;33mENTER PROJECT ID: \e[0m' project_id
           print_gparted_image_options
-          gparted_image_id=$(select_gparted_image_id)
+          image_id=$(select_image_id)
           
-          # FUNGSI UNTUK MEMERIKSA IMAGE SUDAH DITAMBAHKAN KE PROJECT ID YANG SESUAI
-          project_assigned=$(openstack image show "$gparted_image_id" -c properties -f value | grep -o '"os_project_id": "[^"]\+"' | cut -d: -f2 | tr -d '" ')
+          project_assigned=$(openstack image show "$image_id" -c properties -f value | grep -o '"os_project_id": "[^"]\+"' | cut -d: -f2 | tr -d '" ')
           if [ -z "$project_assigned" ]; then
-              printf "Image \e[1;36m%s\e[0m Has Been Added to Project ID \e[1;36m%s\e[0m\n" "$gparted_image_id" "$customer_project_id"
-              openstack image add project "$gparted_image_id" "$customer_project_id"
-              openstack image set --accept "$gparted_image_id" --os-project-id "$customer_project_id"
+              printf "Image \e[1;36m%s\e[0m Has Been Added to Project ID \e[1;36m%s\e[0m\n" "$image_id" "$project_id"
+              openstack image add project "$image_id" "$project_id"
+              openstack image set --accept "$image_id" --os-project-id "$project_id"
           else
-             printf "Image \e[1;36m%s\e[0m Already Added to Project ID \e[1;36m%s\e[0m\n" "$gparted_image_id" "$customer_project_id"
+             printf "Image \e[1;36m%s\e[0m Already Added to Project ID \e[1;36m%s\e[0m\n" "$image_id" "$project_id"
           fi
           ;;
         2)
             print_gparted_image_options
-            gparted_image_id=$(select_gparted_image_id)
-            read -rp $'\e[1;33mENTER CUSTOMER PROJECT ID: \e[0m' customer_project_id
-            show_member_info "$gparted_image_id" "$customer_project_id"
+            image_id=$(select_image_id)
+            read -rp $'\e[1;33mENTER PROJECT ID: \e[0m' project_id
+            show_member_info "$image_id" "$project_id"
             ;;
         3)
-            read -rp $'\e[1;33mENTER CUSTOMER PROJECT ID: \e[0m' customer_project_id
+            read -rp $'\e[1;33mENTER PROJECT ID: \e[0m' project_id
             print_instance_list
-            read -rp $'\e[1;33mENTER CUSTOMER INSTANCE ID: \e[0m' customer_instance_id
+            read -rp $'\e[1;33mENTER INSTANCE ID: \e[0m' instance_id
             print_gparted_image_options
-            gparted_image_id=$(select_gparted_image_id)
-            openstack server rescue --os-project-id "$customer_project_id" "$customer_instance_id" --image "$gparted_image_id"
+            image_id=$(select_image_id)
+            openstack server rescue --os-project-id "$project_id" "$instance_id" --image "$image_id"
             printf "\e[1;31mWaiting 10 Seconds to List the Latest Instance Status...\e[0m\n"
             sleep 10
             print_instance_list
             ;;
         4)
-            read -rp $'\e[1;33mENTER CUSTOMER PROJECT ID: \e[0m' customer_project_id
+            read -rp $'\e[1;33mENTER PROJECT ID: \e[0m' project_id
             print_instance_list
-            read -rp $'\e[1;33mENTER CUSTOMER INSTANCE ID: \e[0m' customer_instance_id
-            if ! openstack server unrescue --os-project-id "$customer_project_id" "$customer_instance_id"; then
+            read -rp $'\e[1;33mENTER INSTANCE ID: \e[0m' instance_id
+            if ! openstack server unrescue --os-project-id "$project_id" "$instance_id"; then
                 printf "\e[1;31mInstance Was Not Found or An Error Occurred!\e[0m\n"
             fi
             printf "\e[1;31mWaiting 10 Seconds to List the Latest Instance Status...\e[0m\n"
@@ -135,17 +198,17 @@ do
             print_instance_list
             ;;
         5)
-            read -rp $'\e[1;33mENTER CUSTOMER INSTANCE ID: \e[0m' instance_id
+            read -rp $'\e[1;33mENTER INSTANCE ID: \e[0m' instance_id
             print_console_url
             ;;
         6)
-            read -rp $'\e[1;33mENTER CUSTOMER PROJECT ID: \e[0m' customer_project_id
+            read -rp $'\e[1;33mENTER PROJECT ID: \e[0m' project_id
             print_gparted_image_options
-            gparted_image_id=$(select_gparted_image_id)
-            openstack image remove project "$gparted_image_id" "$customer_project_id"
-            printf "Image \e[1;36m%s\e[0m Has Been Removed from Project ID \e[1;36m%s\e[0m\n" "$gparted_image_id" "$customer_project_id"
+            image_id=$(select_image_id)
+            openstack image remove project "$image_id" "$project_id"
+            printf "Image \e[1;36m%s\e[0m Has Been Removed from Project ID \e[1;36m%s\e[0m\n" "$image_id" "$project_id"
             ;;
-        X)
+        X|x)
             printf "\e[1;31mExit from NEO Rescue Tools...\e[0m\n"
             exit 0
             ;;
