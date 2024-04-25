@@ -25,17 +25,13 @@ select_image_id() {
         IFS=':' read -r image_id label <<< "${image_ids[index]}"
         printf "%s\n" "$image_id"
     else
-        printf "\e[1;31mInvalid Option!\e[0m\n"
+        printf "\e[1;31m[ERROR] Invalid Option, Please Try Again!!\e[0m\n"
         exit 1
     fi
 }
 
-print_project_id() {
-    printf "Current Project ID \e[1;36m%s\e[0m\n" "$project_id"
-}
-
 print_instance_list() {
-    printf "List Instance for Project ID \e[1;36m%s\e[0m\n" "$project_id"
+    printf "[INFORMATION] List of Instances for Project ID \e[1;36m%s\e[0m\n" "$project_id"
     openstack server list --os-project-id "$project_id"
 }
 
@@ -45,7 +41,7 @@ print_instance_status() {
 }
 
 print_console_url() {
-    printf "URL of the Console Instance \e[1;36m%s\e[0m\n" "$instance_id"
+    printf "[INFORMATION] This is the URL Console of the Instance \e[1;36m%s\e[0m\n" "$instance_id"
     openstack console url show "$instance_id" --os-project-id "$project_id"
 }
 
@@ -55,13 +51,13 @@ show_member_info() {
 
     if [[ -n "$project_id" ]]; then
         if openstack image member list "$image_id" | grep -q "$project_id"; then
-            printf "Current Member of Image \e[1;36m%s\e[0m\n" "$image_id"
+            printf "[INFORMATION] Current Member of Image \e[1;36m%s\e[0m\n" "$image_id"
             openstack image member list "$image_id"
         else
-            printf "No Project ID Added on Image \e[1;36m%s\e[0m\n" "$image_id"
+            printf "[INFORMATION] No Project ID Added on Image \e[1;36m%s\e[0m\n" "$image_id"
         fi
     else
-        printf "\e[1;31mNo Project ID Specified!\e[0m\n"
+        printf "\e[1;31m[ERROR] No Project ID Specified!\e[0m\n"
     fi
 }
 
@@ -81,30 +77,24 @@ remove_user_role() {
     openstack role remove --user "$user_id" --project "$project_id" "$role_id"
 }
 
-print_domain_info() {
-    printf "\e[1;36mDomains\e[0m\n"
-    openstack domain list
-}
-
 print_user_info() {
-    printf "\n\e[1;36mUsers\e[0m\n"
+    printf "\n\e[1;31m[INFORMATION] List of Users That Exist in OpenStack\e[0m\n"
     openstack user list
 }
 
 print_role_info() {
-    printf "\n\e[1;36mRoles\e[0m\n"
+    printf "\n\e[1;31m[INFORMATION] List of Roles That Exist in OpenStack\e[0m\n"
     openstack role list
 }
 
-print_user_role_domain_info() {
-    print_domain_info
+print_user_role_info() {
     print_user_info
     print_role_info
 }
 
 print_menu() {
     printf "\n\e[4m\e[1;36mMENU\e[0m\n"
-    printf "0. Show User, Role & Domain Information\n"
+    printf "D. Show Domain Information\n"
     printf "A. Add User Role to Project\n"
     printf "R. Remove User Role from Project\n"
     printf "U. Show User Role from Project\n"
@@ -124,96 +114,112 @@ do
     read -rp $'\e[1;33mENTER MENU: \e[0m' option
 
     case $option in
-       	0)
-          printf "\e[1;31mDisplaying Required Information from OpenStack...\e[0m\n"
-          print_user_role_domain_info
-          ;;
-       A|a)
-          read -rp $'\e[1;33mENTER USER ID: \e[0m' user_id
-          read -rp $'\e[1;33mENTER PROJECT ID: \e[0m' project_id
-          read -rp $'\e[1;33mENTER ROLE ID: \e[0m' role_id
-          add_user_role "$user_id" "$project_id" "$role_id"
-          printf "User \e[1;36m%s\e[0m Has Been Added to Project ID \e[1;36m%s\e[0m\n" "$user_id" "$project_id"
-          openstack role assignment list --user "$user_id"
-          openstack role assignment list --project "$project_id" --name
-          ;;
-       R|s)
-          read -rp $'\e[1;33mENTER USER ID: \e[0m' user_id
-          read -rp $'\e[1;33mENTER PROJECT ID: \e[0m' project_id
-          read -rp $'\e[1;33mENTER ROLE ID: \e[0m' role_id
-          remove_user_role "$user_id" "$project_id" "$role_id"
-          printf "User \e[1;36m%s\e[0m Has Been Removed from Project ID \e[1;36m%s\e[0m\n" "$user_id" "$project_id"
-          openstack role assignment list --user "$user_id"
-          openstack role assignment list --project "$project_id" --name
-          ;;
-       	U)
-          printf "List User Role for Project ID \e[1;36m%s\e[0m\n" "$project_id"
-          openstack role assignment list --user "$user_id"
-          openstack role assignment list --project "$project_id" --name
-          ;;
-       I|i)
-          read -rp $'\e[1;33mENTER PROJECT ID: \e[0m' project_id
-          print_instance_list
-          ;;
-        1)
-          read -rp $'\e[1;33mENTER PROJECT ID: \e[0m' project_id
-          print_gparted_image_options
-          image_id=$(select_image_id)
-          
-          project_assigned=$(openstack image show "$image_id" -c properties -f value | grep -o '"os_project_id": "[^"]\+"' | cut -d: -f2 | tr -d '" ')
-          if [ -z "$project_assigned" ]; then
-              printf "Image \e[1;36m%s\e[0m Has Been Added to Project ID \e[1;36m%s\e[0m\n" "$image_id" "$project_id"
-              openstack image add project "$image_id" "$project_id"
-              openstack image set --accept "$image_id" --os-project-id "$project_id"
-          else
-             printf "Image \e[1;36m%s\e[0m Already Added to Project ID \e[1;36m%s\e[0m\n" "$image_id" "$project_id"
-          fi
-          ;;
-        2)
+        D|d)
+            printf "\e[1;31m[INFORMATION] List of Domains That Exist in OpenStack\e[0m\n"
+            openstack domain list
+            ;;
+        A|a)
+            read -rp $'\e[1;33mINSERT PROJECT ID: \e[0m' project_id
+            printf "[BEFORE] List of User Roles for Project ID \e[1;36m%s\e[0m\n" "$project_id"
+            openstack role assignment list --project "$project_id" --name
+            print_user_role_info
+            read -rp $'\e[1;33mINSERT USER ID: \e[0m' user_id
+            read -rp $'\e[1;33mINSERT ROLE ID: \e[0m' role_id
+            add_user_role "$user_id" "$project_id" "$role_id"
+            printf "[COMPLETED] User \e[1;36m%s\e[0m Has Been Added to Project ID \e[1;36m%s\e[0m\n" "$user_id" "$project_id"
+            printf "[AFTER] List of User Roles for Project ID \e[1;36m%s\e[0m\n" "$project_id"
+            openstack role assignment list --user "$user_id"
+            openstack role assignment list --project "$project_id" --name
+            ;;
+        R|r)
+            read -rp $'\e[1;33mINSERT PROJECT ID: \e[0m' project_id
+            printf "[BEFORE] List of User Roles for Project ID \e[1;36m%s\e[0m\n" "$project_id"
+            openstack role assignment list --project "$project_id" --name
+            print_user_role_info
+            read -rp $'\e[1;33mINSERT USER ID: \e[0m' user_id
+            read -rp $'\e[1;33mINSERT ROLE ID: \e[0m' role_id
+            remove_user_role "$user_id" "$project_id" "$role_id"
+            printf "[COMPLETED] User \e[1;36m%s\e[0m Has Been Removed from Project ID \e[1;36m%s\e[0m\n" "$user_id" "$project_id"
+            printf "[AFTER] List of User Roles for Project ID \e[1;36m%s\e[0m\n" "$project_id"
+            openstack role assignment list --user "$user_id"
+            openstack role assignment list --project "$project_id" --name
+            ;;
+       	U|u)
+            read -rp $'\e[1;33mINSERT PROJECT ID: \e[0m' project_id
+            printf "[INFORMATION] List of User Roles for Project ID \e[1;36m%s\e[0m\n" "$project_id"
+            openstack role assignment list --project "$project_id" --name
+            ;;
+        I|i)
+            read -rp $'\e[1;33mINSERT PROJECT ID: \e[0m' project_id
+            print_instance_list
+            ;;
+          1)
+            read -rp $'\e[1;33mINSERT PROJECT ID: \e[0m' project_id
             print_gparted_image_options
             image_id=$(select_image_id)
-            read -rp $'\e[1;33mENTER PROJECT ID: \e[0m' project_id
+            
+            project_assigned=$(openstack image show "$image_id" -c properties -f value | grep -o '"os_project_id": "[^"]\+"' | cut -d: -f2 | tr -d '" ')
+            if [ -z "$project_assigned" ]; then
+                printf "[COMPLETED] Image \e[1;36m%s\e[0m Has Been Added to Project ID \e[1;36m%s\e[0m\n" "$image_id" "$project_id"
+                openstack image add project "$image_id" "$project_id"
+                openstack image set --accept "$image_id" --os-project-id "$project_id"
+            else
+                printf "[WARNING] Image \e[1;36m%s\e[0m Already Added to Project ID \e[1;36m%s\e[0m\n" "$image_id" "$project_id"
+            fi
+            ;;
+          2)
+            print_gparted_image_options
+            image_id=$(select_image_id)
+            read -rp $'\e[1;33mINSERT PROJECT ID: \e[0m' project_id
             show_member_info "$image_id" "$project_id"
             ;;
-        3)
-            read -rp $'\e[1;33mENTER PROJECT ID: \e[0m' project_id
-            print_instance_list
-            read -rp $'\e[1;33mENTER INSTANCE ID: \e[0m' instance_id
+          3)
+            read -rp $'\e[1;33mINSERT PROJECT ID: \e[0m' project_id
+            printf "[BEFORE] List of Instances for Project ID \e[1;36m%s\e[0m\n" "$project_id"
+            openstack server list --os-project-id "$project_id"
+            read -rp $'\e[1;33mINSERT INSTANCE ID: \e[0m' instance_id
             print_gparted_image_options
-            image_id=$(select_image_id)
-            openstack server rescue --os-project-id "$project_id" "$instance_id" --image "$image_id"
-            printf "\e[1;31mWaiting 10 Seconds to List the Latest Instance Status...\e[0m\n"
-            sleep 10
-            print_instance_list
-            ;;
-        4)
-            read -rp $'\e[1;33mENTER PROJECT ID: \e[0m' project_id
-            print_instance_list
-            read -rp $'\e[1;33mENTER INSTANCE ID: \e[0m' instance_id
-            if ! openstack server unrescue --os-project-id "$project_id" "$instance_id"; then
-                printf "\e[1;31mInstance Was Not Found or An Error Occurred!\e[0m\n"
+            image_id=$(select_image_id)  
+            if ! openstack server rescue --os-project-id "$project_id" "$instance_id" --image "$image_id"; then
+                printf "\e[1;31m[ERROR] Instance Not Found or Error Inserting Instance ID!\e[0m\n"
             fi
-            printf "\e[1;31mWaiting 10 Seconds to List the Latest Instance Status...\e[0m\n"
-            sleep 10
-            print_instance_list
+            printf "\e[1;31m[INFORMATION] Please Wait a Moment to Display the Latest Instance Status!\e[0m\n"
+            sleep 15
+            printf "[AFTER] List of Instances for Project ID \e[1;36m%s\e[0m\n" "$project_id"
+            openstack server list --os-project-id "$project_id"
             ;;
-        5)
-            read -rp $'\e[1;33mENTER INSTANCE ID: \e[0m' instance_id
+          4)
+            read -rp $'\e[1;33mINSERT PROJECT ID: \e[0m' project_id
+            printf "[BEFORE] List of Instances for Project ID \e[1;36m%s\e[0m\n" "$project_id"
+            openstack server list --os-project-id "$project_id"
+            read -rp $'\e[1;33mINSERT INSTANCE ID: \e[0m' instance_id
+            if ! openstack server unrescue --os-project-id "$project_id" "$instance_id"; then
+                printf "\e[1;31m[ERROR] Instance Not Found or Error Inserting Instance ID!\e[0m\n"
+            fi
+            printf "\e[1;31m[INFORMATION] Please Wait a Moment to Display the Latest Instance Status!\e[0m\n"
+            sleep 10
+            printf "[AFTER] List of Instances for Project ID \e[1;36m%s\e[0m\n" "$project_id"
+            openstack server list --os-project-id "$project_id"
+            ;;
+          5)
+            read -rp $'\e[1;33mINSERT PROJECT ID: \e[0m' project_id
+            print_instance_list
+            read -rp $'\e[1;33mINSERT INSTANCE ID: \e[0m' instance_id
             print_console_url
             ;;
-        6)
-            read -rp $'\e[1;33mENTER PROJECT ID: \e[0m' project_id
+          6)
+            read -rp $'\e[1;33mINSERT PROJECT ID: \e[0m' project_id
             print_gparted_image_options
             image_id=$(select_image_id)
             openstack image remove project "$image_id" "$project_id"
-            printf "Image \e[1;36m%s\e[0m Has Been Removed from Project ID \e[1;36m%s\e[0m\n" "$image_id" "$project_id"
+            printf "[COMPLETED] Image \e[1;36m%s\e[0m Has Been Removed from Project ID \e[1;36m%s\e[0m\n" "$image_id" "$project_id"
             ;;
         X|x)
-            printf "\e[1;31mExit from NEO Rescue Tools...\e[0m\n"
+            printf "\e[1;31m[INFORMATION] Exit from NEO Rescue Tools!\e[0m\n"
             exit 0
             ;;
-        *)
-            printf "\e[1;31mInvalid Option!\e[0m\n"
+          *)
+            printf "\e[1;31m[ERROR] Invalid Option, Please Try Again!!\e[0m\n"
             ;;
     esac
 done
