@@ -9,7 +9,7 @@ printf "██║ ╚████║███████╗╚█████�
 printf "╚═╝  ╚═══╝╚══════╝ ╚═════╝\n"
 printf "\e[1;36m      - RESCUE TOOLS -\e[0m\n"
 
-declare -a image_ids=("0905f508-f240-4ab2-adca-d70d9e4a9e98:JKT-2" "0ad464f1-865d-41dc-a269-a9b7dabeb22c:WJV-2" "fc0d86a9-e795-4d69-b2ba-8fe1d7b1f4de:BTN-1")
+declare -a image_ids=("<image_id>:IMG-1" "<image_id>:IMG-2" "<image_id>:IMG-3")
 
 print_gparted_image_options() {
     for ((i=0; i<${#image_ids[@]}; i++)); do
