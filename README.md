@@ -1,5 +1,9 @@
 ## Installation
-- Download Source Code Script (https://github.com/madfxr/neo-rescue-tools)
-- vim /usr/bin/neo-rescue-tools
-- Grant permissions to a file /usr/bin/neo-rescue-tools dengan ```chmod +x /usr/bin/neo-rescue-tools```
-- Run neo-rescue-tools
+- Make sure to download and place the tool in the ```/usr/bin``` directory.
+- Download the tool source code by running the command: ```sudo wget https://raw.githubusercontent.com/madfxr/neo-rescue-tools/main/neo-rescue-tools```.
+- Grant access rights to the ```/usr/bin/neo-rescue-tools``` file by running the command: ```sudo chmod +x /usr/bin/neo-rescue-tools```
+- Before running this tool, make sure to modify the ```/usr/bin/neo-rescue-tools``` file and change the section:
+  ```declare -a image_ids=("<image_id>:IMG-1" "<image_id>:IMG-2" "<image_id>:IMG-3")```
+
+Notes: Customize <image_id> with the Image ID being used (For example: 
+
