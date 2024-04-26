@@ -5,4 +5,4 @@
 - Before running this tool, make sure to modify the ```/usr/bin/neo-rescue-tools``` file and change the section:
   ```declare -a image_ids=("<image_id>:IMG-1" "<image_id>:IMG-2" "<image_id>:IMG-3")```
 
-*Notes:* Change ```<image_id>``` with the Image ID being used (For example: ```12345678-abcd-a1b2-2024-neo123456789```
+*Notes: Change on this line ```"<image_id>:IMG-1" "<image_id>:IMG-2" "<image_id>:IMG-3"``` with the Image ID being used (For example: ```12345678-abcd-a1b2-2024-neo123456789:IMG-1 12345678-efgh-c3d4-2024-neo123456789:IMG-2 12345678-ijkl-e5f6-2024-neo123456789:IMG-3```*
