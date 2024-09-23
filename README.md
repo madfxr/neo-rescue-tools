@@ -2,6 +2,7 @@
 
 ## Requirements
 - Text Editor (For example: Vim, Nano, Atom, Notepad++, Visual Studio Code, Sublime Text)
+- Bash
 - Wget
 
 ## Installation
