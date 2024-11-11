@@ -7,7 +7,7 @@
 
 ## Installation
 - Make sure to download and place the tool in the ``/usr/bin`` directory.
-- Download the tool source code by running the command: ``sudo wget https://raw.githubusercontent.com/madfxr/neo-rescue-tools/main/neo-rescue-tools``.
+- Download the tool source code by running the command: ``sudo wget https://raw.githubusercontent.com/madfxr/neo-rescue-tools/refs/heads/main/neo-rescue-tools``.
 - Grant access rights to the ``/usr/bin/neo-rescue-tools`` file by running the command: ``sudo chmod +x /usr/bin/neo-rescue-tools``.
 - Before running this tool, make sure to modify the ``/usr/bin/neo-rescue-tools`` file and change the section:
   ```
