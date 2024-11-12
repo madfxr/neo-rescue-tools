@@ -32,17 +32,17 @@ select_image_id() {
 
 print_instance_list() {
     printf "[INFORMATION] List of Instances for Project ID \e[1;36m%s\e[0m\n" "$project_id"
-    openstack server list --os-project-id "$project_id"
+    openstack server list --os-project-id "$project_id" --fit-width
 }
 
 print_instance_status() {
     instance_id="$1"
-    openstack server show "$instance_id" --os-project-id "$project_id"
+    openstack server show "$instance_id" --os-project-id "$project_id" --fit-width
 }
 
 print_console_url() {
     printf "[INFORMATION] This is the URL Console of the Instance \e[1;36m%s\e[0m\n" "$instance_id"
-    openstack console url show "$instance_id" --os-project-id "$project_id"
+    openstack console url show "$instance_id" --os-project-id "$project_id" --fit-width
 }
 
 show_member_info() {
@@ -52,7 +52,7 @@ show_member_info() {
     if [[ -n "$project_id" ]]; then
         if openstack image member list "$image_id" | grep -q "$project_id"; then
             printf "[INFORMATION] Current Member of Image \e[1;36m%s\e[0m\n" "$image_id"
-            openstack image member list "$image_id"
+            openstack image member list "$image_id" --fit-width
         else
             printf "[INFORMATION] No Project ID Added on Image \e[1;36m%s\e[0m\n" "$image_id"
         fi
@@ -79,12 +79,12 @@ remove_user_role() {
 
 print_user_info() {
     printf "\n\e[1;31m[INFORMATION] List of Users That Exist in OpenStack\e[0m\n"
-    openstack user list
+    openstack user list --fit-width
 }
 
 print_role_info() {
     printf "\n\e[1;31m[INFORMATION] List of Roles That Exist in OpenStack\e[0m\n"
-    openstack role list
+    openstack role list --fit-width
 }
 
 print_user_role_info() {
@@ -116,38 +116,38 @@ do
     case $option in
         D|d)
             printf "\e[1;31m[INFORMATION] List of Domains That Exist in OpenStack\e[0m\n"
-            openstack domain list
+            openstack domain list --fit-width
             ;;
         A|a)
             read -rp $'\e[1;33mINSERT PROJECT ID: \e[0m' project_id
             printf "[BEFORE] List of User Roles for Project ID \e[1;36m%s\e[0m\n" "$project_id"
-            openstack role assignment list --project "$project_id" --name
+            openstack role assignment list --project "$project_id" --name --fit-width
             print_user_role_info
             read -rp $'\e[1;33mINSERT USER ID: \e[0m' user_id
             read -rp $'\e[1;33mINSERT ROLE ID: \e[0m' role_id
             add_user_role "$user_id" "$project_id" "$role_id"
             printf "[COMPLETED] User \e[1;36m%s\e[0m Has Been Added to Project ID \e[1;36m%s\e[0m\n" "$user_id" "$project_id"
             printf "[AFTER] List of User Roles for Project ID \e[1;36m%s\e[0m\n" "$project_id"
-            openstack role assignment list --user "$user_id"
-            openstack role assignment list --project "$project_id" --name
+            openstack role assignment list --user "$user_id" --fit-width
+            openstack role assignment list --project "$project_id" --name --fit-width
             ;;
         R|r)
             read -rp $'\e[1;33mINSERT PROJECT ID: \e[0m' project_id
             printf "[BEFORE] List of User Roles for Project ID \e[1;36m%s\e[0m\n" "$project_id"
-            openstack role assignment list --project "$project_id" --name
+            openstack role assignment list --project "$project_id" --name --fit-width
             print_user_role_info
             read -rp $'\e[1;33mINSERT USER ID: \e[0m' user_id
             read -rp $'\e[1;33mINSERT ROLE ID: \e[0m' role_id
             remove_user_role "$user_id" "$project_id" "$role_id"
             printf "[COMPLETED] User \e[1;36m%s\e[0m Has Been Removed from Project ID \e[1;36m%s\e[0m\n" "$user_id" "$project_id"
             printf "[AFTER] List of User Roles for Project ID \e[1;36m%s\e[0m\n" "$project_id"
-            openstack role assignment list --user "$user_id"
-            openstack role assignment list --project "$project_id" --name
+            openstack role assignment list --user "$user_id" --fit-width
+            openstack role assignment list --project "$project_id" --name --fit-width
             ;;
         U|u)
             read -rp $'\e[1;33mINSERT PROJECT ID: \e[0m' project_id
             printf "[INFORMATION] List of User Roles for Project ID \e[1;36m%s\e[0m\n" "$project_id"
-            openstack role assignment list --project "$project_id" --name
+            openstack role assignment list --project "$project_id" --name --fit-width
             ;;
         I|i)
             read -rp $'\e[1;33mINSERT PROJECT ID: \e[0m' project_id
@@ -176,7 +176,7 @@ do
           3)
             read -rp $'\e[1;33mINSERT PROJECT ID: \e[0m' project_id
             printf "[BEFORE] List of Instances for Project ID \e[1;36m%s\e[0m\n" "$project_id"
-            openstack server list --os-project-id "$project_id"
+            openstack server list --os-project-id "$project_id" --fit-width
             read -rp $'\e[1;33mINSERT INSTANCE ID: \e[0m' instance_id
             print_gparted_image_options
             image_id=$(select_image_id)
@@ -186,12 +186,12 @@ do
             printf "\e[1;31m[INFORMATION] Please Wait a Moment to Display the Latest Instance Status!\e[0m\n"
             sleep 15
             printf "[AFTER] List of Instances for Project ID \e[1;36m%s\e[0m\n" "$project_id"
-            openstack server list --os-project-id "$project_id"
+            openstack server list --os-project-id "$project_id" --fit-width
             ;;
           4)
             read -rp $'\e[1;33mINSERT PROJECT ID: \e[0m' project_id
             printf "[BEFORE] List of Instances for Project ID \e[1;36m%s\e[0m\n" "$project_id"
-            openstack server list --os-project-id "$project_id"
+            openstack server list --os-project-id "$project_id" --fit-width
             read -rp $'\e[1;33mINSERT INSTANCE ID: \e[0m' instance_id
             if ! openstack server unrescue --os-project-id "$project_id" "$instance_id"; then
                 printf "\e[1;31m[ERROR] Instance Not Found or Error Inserting Instance ID!\e[0m\n"
@@ -199,7 +199,7 @@ do
             printf "\e[1;31m[INFORMATION] Please Wait a Moment to Display the Latest Instance Status!\e[0m\n"
             sleep 10
             printf "[AFTER] List of Instances for Project ID \e[1;36m%s\e[0m\n" "$project_id"
-            openstack server list --os-project-id "$project_id"
+            openstack server list --os-project-id "$project_id" --fit-width
             ;;
           5)
             read -rp $'\e[1;33mINSERT PROJECT ID: \e[0m' project_id
