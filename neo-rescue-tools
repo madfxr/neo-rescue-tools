@@ -9,7 +9,7 @@ printf "██║ ╚████║███████╗╚█████�
 printf "╚═╝  ╚═══╝╚══════╝ ╚═════╝\n"
 printf "\e[1;36m      - RESCUE TOOLS -\e[0m\n"
 
-declare -a image_ids=("<image_id>:IMG-1" "<image_id>:IMG-2" "<image_id>:IMG-3")
+declare -a image_ids=("c764f12c-25fd-413f-b5fa-c117ce895251:JKT-2" "fd016695-4e99-4f59-9252-e90c210b4183:WJV-2" "615d1ac1-acba-4e92-ad59-07c186dcd265:BTN-1")
 
 print_gparted_image_options() {
     for ((i=0; i<${#image_ids[@]}; i++)); do
@@ -65,7 +65,7 @@ add_user_role() {
     local user_id="$1"
     local project_id="$2"
     local role_id="$3"
-    
+
     openstack role add --user "$user_id" --project "$project_id" "$role_id"
 }
 
@@ -73,7 +73,7 @@ remove_user_role() {
     local user_id="$1"
     local project_id="$2"
     local role_id="$3"
-    
+
     openstack role remove --user "$user_id" --project "$project_id" "$role_id"
 }
 
@@ -144,7 +144,7 @@ do
             openstack role assignment list --user "$user_id"
             openstack role assignment list --project "$project_id" --name
             ;;
-       	U|u)
+        U|u)
             read -rp $'\e[1;33mINSERT PROJECT ID: \e[0m' project_id
             printf "[INFORMATION] List of User Roles for Project ID \e[1;36m%s\e[0m\n" "$project_id"
             openstack role assignment list --project "$project_id" --name
@@ -157,7 +157,7 @@ do
             read -rp $'\e[1;33mINSERT PROJECT ID: \e[0m' project_id
             print_gparted_image_options
             image_id=$(select_image_id)
-            
+
             project_assigned=$(openstack image show "$image_id" -c properties -f value | grep -o '"os_project_id": "[^"]\+"' | cut -d: -f2 | tr -d '" ')
             if [ -z "$project_assigned" ]; then
                 printf "[COMPLETED] Image \e[1;36m%s\e[0m Has Been Added to Project ID \e[1;36m%s\e[0m\n" "$image_id" "$project_id"
@@ -179,7 +179,7 @@ do
             openstack server list --os-project-id "$project_id"
             read -rp $'\e[1;33mINSERT INSTANCE ID: \e[0m' instance_id
             print_gparted_image_options
-            image_id=$(select_image_id)  
+            image_id=$(select_image_id)
             if ! openstack server rescue --os-project-id "$project_id" "$instance_id" --image "$image_id"; then
                 printf "\e[1;31m[ERROR] Instance Not Found or Error Inserting Instance ID!\e[0m\n"
             fi
